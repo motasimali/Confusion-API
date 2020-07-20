@@ -2,6 +2,8 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var FileStore = require('session-file-store')(session);
 var logger = require('morgan');
 var mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
@@ -34,12 +36,20 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('OkGKAUqxDA'));
+// app.use(cookieParser('OkGKAUqxDA'));
+
+app.use(session({
+  name: 'session-id',
+  secret: 'OkGKAUqxDA',
+  saveUninitialized : false,
+  resave: false,
+  store: new FileStore()
+}));
 
 function auth(req, res, next) {
-  console.log(req.signedCookies);
+  console.log(req.session);
 
-  if(!req.signedCookies.user) {
+  if(!req.session.user) {
     if(!req.headers.authorization) {
       var err = new Error('You are not Authenticated!');
       res.setHeader('WWW-Authenticate', 'Basic');
@@ -51,7 +61,7 @@ function auth(req, res, next) {
     var userName = auth[0];
     var passWord = auth[1];
     if(userName == 'admin' && passWord == 'P@ssw0rd') {
-      res.cookie('user','admin', { signed : true});
+      req.session.user = userName;
       next();
     } else {
       var err = new Error('You are not Authenticated!');
@@ -61,7 +71,7 @@ function auth(req, res, next) {
       return;
     }
   } else {
-    if(req.signedCookies.user == 'admin') {
+    if(req.session.user == 'admin') {
       next();
     } else {
       var err = new Error('You are not Authenticated!');
