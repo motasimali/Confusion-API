@@ -26,30 +26,30 @@ var promoRouter = require('./routes/promoRouter');
 
 var app = express();
 
-// function auth(req, res, next) {
-//   console.log(req.headers);
-//   if(!req.headers.authorization) {
-//     var err = new Error('You are not Authenticated!');
-//     res.setHeader('WWW-Authenticate', 'Basic');
-//     err.status = 401;
-//     next(err);
-//     return;
-//   }
-//   var auth = new Buffer.from(req.headers.authorization.split(' ')[1],'base64').toString().split(':');
-//   var userName = auth[0];
-//   var passWord = auth[1];
-//   if(userName == 'admin' && passWord == 'P@ssw0rd') {
-//     next();
-//   } else {
-//     var err = new Error('You are not Authenticated!');
-//     res.setHeader('WWW-Authenticate', 'Basic');
-//     err.status = 401;
-//     next(err);
-//     return;
-//   }
-// }
+function auth(req, res, next) {
+  console.log(req.headers);
+  if(!req.headers.authorization) {
+    var err = new Error('You are not Authenticated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    next(err);
+    return;
+  }
+  var auth = new Buffer.from(req.headers.authorization.split(' ')[1],'base64').toString().split(':');
+  var userName = auth[0];
+  var passWord = auth[1];
+  if(userName == 'admin' && passWord == 'P@ssw0rd') {
+    next();
+  } else {
+    var err = new Error('You are not Authenticated!');
+    res.setHeader('WWW-Authenticate', 'Basic');
+    err.status = 401;
+    next(err);
+    return;
+  }
+}
 
-// app.use(auth);
+app.use(auth);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
