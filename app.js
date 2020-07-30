@@ -11,9 +11,9 @@ const Promotions = require('./models/promotions');
 const Leaders = require('./models/leaders');
 var passport = require('passport');
 var authenticate = require('./authenticate');
+const config  = require('./config');
 
-const url = 'mongodb://localhost:27017/conFusion';
-const connect = mongoose.connect(url);
+const connect = mongoose.connect(config.mongoUrl);
 
 connect.then((db)=>{
   console.log('connected successfully to MONGO DB');
@@ -38,35 +38,10 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-// app.use(cookieParser('OkGKAUqxDA'));
-
-app.use(session({
-  name: 'session-id',
-  secret: 'OkGKAUqxDA',
-  saveUninitialized : false,
-  resave: false,
-  store: new FileStore()
-}));
 app.use(passport.initialize());
-app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
-
-function auth(req, res, next) {
-  console.log(req.session);
-
-  if(!req.user) {
-      var err = new Error('You are not Authenticated!');
-      err.status = 401;
-      next(err); 
-      return;
-  } else {
-    next();
-  }   
-}
-
-app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
